@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:projectapps/models/request.dart';
 import 'package:projectapps/database/database_helper.dart';
 import 'package:projectapps/providers/theme_provider.dart';
+import 'package:projectapps/screens/user_list_screen.dart';
 import 'request_form_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final removedRequest = _requestList.removeAt(index);
       _listKey.currentState?.removeItem(
         index,
-            (context, animation) => _buildItem(removedRequest, animation),
+        (context, animation) => _buildItem(removedRequest, animation),
       );
     });
   }
@@ -51,19 +52,23 @@ class _HomeScreenState extends State<HomeScreen> {
       sizeFactor: animation,
       child: ListTile(
         title: Text(request.title),
-        subtitle: Text('${request.fullName}\n${request.startDate.toLocal().toString().split(' ')[0]} - ${request.endDate.toLocal().toString().split(' ')[0]}'),
+        subtitle: Text(
+            '${request.fullName}\n${request.startDate.toLocal().toString().split(' ')[0]} - ${request.endDate.toLocal().toString().split(' ')[0]}'),
         isThreeLine: true,
         onTap: () async {
           await Navigator.push(
             context,
             PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => RequestFormScreen(request: request),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  RequestFormScreen(request: request),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 const begin = Offset(1.0, 0.0);
                 const end = Offset.zero;
                 const curve = Curves.ease;
 
-                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
 
                 return SlideTransition(
                   position: animation.drive(tween),
@@ -89,63 +94,80 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Заявки'),
-        actions: [
-          Switch(
-            value: themeProvider.themeMode == ThemeMode.dark,
-            onChanged: (value) {
-              themeProvider.toggleTheme(value);
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<List<Request>>(
-        future: _requestsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Ошибка: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Нет заявок'));
-          } else {
-            return AnimatedList(
-              key: _listKey,
-              initialItemCount: _requestList.length,
-              itemBuilder: (context, index, animation) {
-                return _buildItem(_requestList[index], animation);
-              },
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () async {
-          final newRequest = await Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => RequestFormScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0);
-                const end = Offset.zero;
-                const curve = Curves.ease;
-
-                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                return SlideTransition(
-                  position: animation.drive(tween),
-                  child: child,
-                );
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Project Apps'),
+          actions: [
+            Switch(
+              value: themeProvider.themeMode == ThemeMode.dark,
+              onChanged: (value) {
+                themeProvider.toggleTheme(value);
               },
             ),
-          );
-          if (newRequest != null) {
-            _addRequest(newRequest);
-          }
-        },
+          ],
+          bottom: TabBar(
+            tabs: [
+              Tab(text: 'Заявки'),
+              Tab(text: 'Пользователи'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            FutureBuilder<List<Request>>(
+              future: _requestsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Ошибка: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('Нет заявок'));
+                } else {
+                  return AnimatedList(
+                    key: _listKey,
+                    initialItemCount: _requestList.length,
+                    itemBuilder: (context, index, animation) {
+                      return _buildItem(_requestList[index], animation);
+                    },
+                  );
+                }
+              },
+            ),
+            UserListScreen(),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () async {
+            final newRequest = await Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    RequestFormScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.ease;
+
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+            );
+            if (newRequest != null) {
+              _addRequest(newRequest);
+            }
+          },
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/request.dart';
+import '../models/user.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -11,7 +12,7 @@ class DatabaseHelper {
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await _initDB('requests.db');
+    _database = await _initDB('projectapps.db');
     return _database!;
   }
 
@@ -25,7 +26,6 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     const idType = 'TEXT PRIMARY KEY';
     const textType = 'TEXT NOT NULL';
-    const dateType = 'TEXT NOT NULL';
 
     await db.execute('''
 CREATE TABLE requests ( 
@@ -35,8 +35,17 @@ CREATE TABLE requests (
   position $textType,
   employeeNumber $textType,
   department $textType,
-  startDate $dateType,
-  endDate $dateType
+  startDate $textType,
+  endDate $textType
+  )
+''');
+
+    await db.execute('''
+CREATE TABLE users ( 
+  id $idType, 
+  name $textType,
+  email $textType,
+  position $textType
   )
 ''');
   }
@@ -70,6 +79,40 @@ CREATE TABLE requests (
 
     await db.delete(
       'requests',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> createUser(User user) async {
+    final db = await instance.database;
+    await db.insert('users', user.toMap());
+  }
+
+  Future<List<User>> readAllUsers() async {
+    final db = await instance.database;
+
+    final result = await db.query('users');
+
+    return result.map((json) => User.fromMap(json)).toList();
+  }
+
+  Future<void> updateUser(User user) async {
+    final db = await instance.database;
+
+    await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<void> deleteUser(String id) async {
+    final db = await instance.database;
+
+    await db.delete(
+      'users',
       where: 'id = ?',
       whereArgs: [id],
     );

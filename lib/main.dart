@@ -17,12 +17,12 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Project Apps',
             theme: ThemeData(
-              primarySwatch: Colors.blueGrey,
+              primarySwatch: Colors.blue,
               brightness: Brightness.light,
             ),
             darkTheme: ThemeData(
               brightness: Brightness.dark,
-              primarySwatch: Colors.blueGrey,
+              primarySwatch: Colors.blue,
             ),
             themeMode: themeProvider.themeMode, // Использование темы из провайдера
             home: HomeScreen(),

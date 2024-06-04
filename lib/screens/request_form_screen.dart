@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:projectapps/models/request.dart';
-import 'package:projectapps/database/database_helper.dart';
 import 'package:uuid/uuid.dart';
+import 'package:projectapps/models/request.dart';
+import 'package:projectapps/models/user.dart';
+import 'package:projectapps/database/database_helper.dart';
 
 class RequestFormScreen extends StatefulWidget {
   final Request? request;
@@ -23,10 +24,13 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   late String _department;
   late DateTime _startDate;
   late DateTime _endDate;
+  late Future<List<User>> _usersFuture;
+  User? _selectedUser;
 
   @override
   void initState() {
     super.initState();
+    _usersFuture = DatabaseHelper.instance.readAllUsers();
     if (widget.request != null) {
       _title = widget.request!.title;
       _fullName = widget.request!.fullName;
@@ -93,8 +97,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.request == null ? 'Создать заявку' : 'Редактировать заявку'),
+        title: Text(widget.request == null ? 'Создать заявку' : 'Редактировать заявку'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -115,19 +118,52 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                   _title = value!;
                 },
               ),
-              TextFormField(
-                initialValue: _fullName,
-                decoration: InputDecoration(labelText: 'ФИО'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Пожалуйста, введите ФИО';
+              FutureBuilder<List<User>>(
+                future: _usersFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Ошибка: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Нет пользователей'));
+                  } else {
+                    return DropdownButtonFormField<User>(
+                      decoration: InputDecoration(labelText: 'Выберите пользователя'),
+                      items: snapshot.data!.map((user) {
+                        return DropdownMenuItem<User>(
+                          value: user,
+                          child: Text(user.name),
+                        );
+                      }).toList(),
+                      onChanged: (user) {
+                        setState(() {
+                          _selectedUser = user;
+                          _fullName = user!.name;
+                          _position = user.position;
+                          _employeeNumber = user.id;
+                          _department = user.position;
+                        });
+                      },
+                      value: _selectedUser,
+                    );
                   }
-                  return null;
-                },
-                onSaved: (value) {
-                  _fullName = value!;
                 },
               ),
+              if (_selectedUser == null)
+                TextFormField(
+                  initialValue: _fullName,
+                  decoration: InputDecoration(labelText: 'ФИО'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Пожалуйста, введите ФИО';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _fullName = value!;
+                  },
+                ),
               TextFormField(
                 initialValue: _position,
                 decoration: InputDecoration(labelText: 'Должность'),
@@ -156,8 +192,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
               ),
               TextFormField(
                 initialValue: _department,
-                decoration:
-                    InputDecoration(labelText: 'Наименование подразделения'),
+                decoration: InputDecoration(labelText: 'Наименование подразделения'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Пожалуйста, введите наименование подразделения';
@@ -169,14 +204,12 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                 },
               ),
               ListTile(
-                title:
-                    Text("Дата начала: ${_startDate.toLocal()}".split(' ')[0]),
+                title: Text("Дата начала: ${_startDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, true),
               ),
               ListTile(
-                title:
-                    Text("Дата окончания: ${_endDate.toLocal()}".split(' ')[0]),
+                title: Text("Дата окончания: ${_endDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, false),
               ),
