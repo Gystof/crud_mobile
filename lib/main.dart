@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
+import 'providers/theme_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -8,12 +10,25 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Project Apps',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Project Apps',
+            theme: ThemeData(
+              primarySwatch: Colors.blueGrey,
+              brightness: Brightness.light,
+            ),
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              primarySwatch: Colors.blueGrey,
+            ),
+            themeMode: themeProvider.themeMode, // Использование темы из провайдера
+            home: HomeScreen(),
+          );
+        },
       ),
-      home: HomeScreen(),
     );
   }
 }
