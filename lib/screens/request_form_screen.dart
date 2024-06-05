@@ -97,7 +97,8 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.request == null ? 'Создать заявку' : 'Редактировать заявку'),
+        title: Text(
+            widget.request == null ? 'Создать заявку' : 'Редактировать заявку'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -129,7 +130,8 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                     return Center(child: Text('Нет пользователей'));
                   } else {
                     return DropdownButtonFormField<User>(
-                      decoration: InputDecoration(labelText: 'Выберите пользователя'),
+                      decoration:
+                          InputDecoration(labelText: 'Выберите пользователя'),
                       items: snapshot.data!.map((user) {
                         return DropdownMenuItem<User>(
                           value: user,
@@ -192,7 +194,8 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
               ),
               TextFormField(
                 initialValue: _department,
-                decoration: InputDecoration(labelText: 'Наименование подразделения'),
+                decoration:
+                    InputDecoration(labelText: 'Наименование подразделения'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Пожалуйста, введите наименование подразделения';
@@ -204,12 +207,14 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                 },
               ),
               ListTile(
-                title: Text("Дата начала: ${_startDate.toLocal()}".split(' ')[0]),
+                title:
+                    Text("Дата начала: ${_startDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, true),
               ),
               ListTile(
-                title: Text("Дата окончания: ${_endDate.toLocal()}".split(' ')[0]),
+                title:
+                    Text("Дата окончания: ${_endDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, false),
               ),

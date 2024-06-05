@@ -1,120 +1,44 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/request.dart';
 import '../models/user.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
-  static Database? _database;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   DatabaseHelper._init();
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-
-    _database = await _initDB('projectapps.db');
-    return _database!;
-  }
-
-  Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
-
-    return await openDatabase(path, version: 1, onCreate: _createDB);
-  }
-
-  Future _createDB(Database db, int version) async {
-    const idType = 'TEXT PRIMARY KEY';
-    const textType = 'TEXT NOT NULL';
-
-    await db.execute('''
-CREATE TABLE requests ( 
-  id $idType, 
-  title $textType,
-  fullName $textType,
-  position $textType,
-  employeeNumber $textType,
-  department $textType,
-  startDate $textType,
-  endDate $textType
-  )
-''');
-
-    await db.execute('''
-CREATE TABLE users ( 
-  id $idType, 
-  name $textType,
-  email $textType,
-  position $textType
-  )
-''');
-  }
-
   Future<void> createRequest(Request request) async {
-    final db = await instance.database;
-    await db.insert('requests', request.toMap());
+    await _db.collection('requests').doc(request.id).set(request.toMap());
   }
 
   Future<List<Request>> readAllRequests() async {
-    final db = await instance.database;
-
-    final result = await db.query('requests');
-
-    return result.map((json) => Request.fromMap(json)).toList();
+    final snapshot = await _db.collection('requests').get();
+    return snapshot.docs.map((doc) => Request.fromMap(doc.data())).toList();
   }
 
   Future<void> updateRequest(Request request) async {
-    final db = await instance.database;
-
-    await db.update(
-      'requests',
-      request.toMap(),
-      where: 'id = ?',
-      whereArgs: [request.id],
-    );
+    await _db.collection('requests').doc(request.id).update(request.toMap());
   }
 
   Future<void> deleteRequest(String id) async {
-    final db = await instance.database;
-
-    await db.delete(
-      'requests',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.collection('requests').doc(id).delete();
   }
 
   Future<void> createUser(User user) async {
-    final db = await instance.database;
-    await db.insert('users', user.toMap());
+    await _db.collection('users').doc(user.id).set(user.toMap());
   }
 
   Future<List<User>> readAllUsers() async {
-    final db = await instance.database;
-
-    final result = await db.query('users');
-
-    return result.map((json) => User.fromMap(json)).toList();
+    final snapshot = await _db.collection('users').get();
+    return snapshot.docs.map((doc) => User.fromMap(doc.data())).toList();
   }
 
   Future<void> updateUser(User user) async {
-    final db = await instance.database;
-
-    await db.update(
-      'users',
-      user.toMap(),
-      where: 'id = ?',
-      whereArgs: [user.id],
-    );
+    await _db.collection('users').doc(user.id).update(user.toMap());
   }
 
   Future<void> deleteUser(String id) async {
-    final db = await instance.database;
-
-    await db.delete(
-      'users',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _db.collection('users').doc(id).delete();
   }
 }
