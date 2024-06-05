@@ -88,7 +88,8 @@ class _UserListScreenState extends State<UserListScreen> {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: Text('Удалить пользователя'),
-                          content: Text('Вы уверены, что хотите удалить этого пользователя?'),
+                          content: Text(
+                              'Вы уверены, что хотите удалить этого пользователя?'),
                           actions: [
                             TextButton(
                               child: Text('Отмена'),

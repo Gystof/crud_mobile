@@ -37,54 +37,85 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _removeRequest(int index) {
-    setState(() {
+  void _removeRequest(int index) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Удалить заявку'),
+        content: Text('Вы уверены, что хотите удалить эту заявку?'),
+        actions: [
+          TextButton(
+            child: Text('Отмена'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text('Удалить'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
       final removedRequest = _requestList.removeAt(index);
       _listKey.currentState?.removeItem(
         index,
         (context, animation) => _buildItem(removedRequest, animation),
       );
-    });
+      await DatabaseHelper.instance.deleteRequest(removedRequest.id);
+    }
   }
 
   Widget _buildItem(Request request, Animation<double> animation) {
     return SizeTransition(
       sizeFactor: animation,
-      child: ListTile(
-        title: Text(request.title),
-        subtitle: Text(
-            '${request.fullName}\n${request.startDate.toLocal().toString().split(' ')[0]} - ${request.endDate.toLocal().toString().split(' ')[0]}'),
-        isThreeLine: true,
-        onTap: () async {
-          await Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  RequestFormScreen(request: request),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0);
-                const end = Offset.zero;
-                const curve = Curves.ease;
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: ListTile(
+          title: Text(
+            request.title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('ФИО: ${request.fullName}'),
+              Text('Должность: ${request.position}'),
+              Text('Табельный №: ${request.employeeNumber}'),
+              Text('Подразделение: ${request.department}'),
+              Text(
+                  'Период: ${request.startDate.toLocal().toString().split(' ')[0]} - ${request.endDate.toLocal().toString().split(' ')[0]}'),
+            ],
+          ),
+          isThreeLine: true,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    RequestFormScreen(request: request),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.ease;
 
-                var tween = Tween(begin: begin, end: end)
-                    .chain(CurveTween(curve: curve));
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
 
-                return SlideTransition(
-                  position: animation.drive(tween),
-                  child: child,
-                );
-              },
-            ),
-          );
-          _refreshRequests();
-        },
-        trailing: IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () async {
-            await DatabaseHelper.instance.deleteRequest(request.id);
-            _removeRequest(_requestList.indexOf(request));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+            );
+            _refreshRequests();
           },
+          trailing: IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () => _removeRequest(_requestList.indexOf(request)),
+          ),
         ),
       ),
     );
@@ -98,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Project Apps'),
+          title: Text('СИБИНТЕК'),
           actions: [
             Switch(
               value: themeProvider.themeMode == ThemeMode.dark,

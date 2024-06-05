@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -31,7 +31,8 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.blue,
             ),
             themeMode: themeProvider.themeMode,
-            home: HomeScreen(),
+            home: SplashScreen(),
+            debugShowCheckedModeBanner: false, // Отключаем баннер отладки
           );
         },
       ),

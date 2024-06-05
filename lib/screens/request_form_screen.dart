@@ -27,6 +27,17 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   late Future<List<User>> _usersFuture;
   User? _selectedUser;
 
+  final List<String> _titles = [
+    "Заявление о переводе на другую работу",
+    "Заявление об увольнении",
+    "Заявление о предоставлении отпуска",
+    "Заявление о выдаче трудовой книжки",
+    "Заявление о продлении или переносе отпуска",
+    "Заявление о предоставлении ежегодного оплачиваемого отпуска",
+    "Заявление о предоставлении отпуска без сохранения заработной платы",
+    "Заявление о внесении сведений в трудовую книжку по основному месту работы"
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -40,7 +51,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
       _startDate = widget.request!.startDate;
       _endDate = widget.request!.endDate;
     } else {
-      _title = '';
+      _title = _titles[0];
       _fullName = '';
       _position = '';
       _employeeNumber = '';
@@ -106,18 +117,28 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
-              TextFormField(
-                initialValue: _title,
-                decoration: InputDecoration(labelText: 'Название заявки'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Пожалуйста, введите название заявки';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _title = value!;
-                },
+              DropdownButtonHideUnderline(
+                child: DropdownButtonFormField<String>(
+                  value: _title,
+                  decoration: InputDecoration(labelText: 'Тип заявления'),
+                  items: _titles.map((title) {
+                    return DropdownMenuItem<String>(
+                      value: title,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 250),
+                        child: Text(
+                          title,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _title = value!;
+                    });
+                  },
+                ),
               ),
               FutureBuilder<List<User>>(
                 future: _usersFuture,
@@ -152,20 +173,6 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                   }
                 },
               ),
-              if (_selectedUser == null)
-                TextFormField(
-                  initialValue: _fullName,
-                  decoration: InputDecoration(labelText: 'ФИО'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Пожалуйста, введите ФИО';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _fullName = value!;
-                  },
-                ),
               TextFormField(
                 initialValue: _position,
                 decoration: InputDecoration(labelText: 'Должность'),
@@ -208,13 +215,13 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
               ),
               ListTile(
                 title:
-                    Text("Дата начала: ${_startDate.toLocal()}".split(' ')[0]),
+                    Text("Дата_начала: ${_startDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, true),
               ),
               ListTile(
                 title:
-                    Text("Дата окончания: ${_endDate.toLocal()}".split(' ')[0]),
+                    Text("Дата_окончания: ${_endDate.toLocal()}".split(' ')[0]),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context, false),
               ),
