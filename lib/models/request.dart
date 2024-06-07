@@ -1,12 +1,12 @@
 class Request {
-  String id;
-  String title;
-  String fullName;
-  String position;
-  String employeeNumber;
-  String department;
-  DateTime startDate;
-  DateTime endDate;
+  final String id;
+  final String title;
+  final String fullName;
+  final String position;
+  final String employeeNumber;
+  final String department;
+  final DateTime startDate;
+  final DateTime endDate;
 
   Request({
     required this.id,
@@ -19,8 +19,20 @@ class Request {
     required this.endDate,
   });
 
-  // Метод для преобразования объекта в Map (для хранения в базе данных)
-  Map<String, dynamic> toMap() {
+  factory Request.fromJson(Map<String, dynamic> json) {
+    return Request(
+      id: json['id'],
+      title: json['title'],
+      fullName: json['fullName'],
+      position: json['position'],
+      employeeNumber: json['employeeNumber'],
+      department: json['department'],
+      startDate: DateTime.parse(json['startDate']),
+      endDate: DateTime.parse(json['endDate']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
@@ -31,19 +43,5 @@ class Request {
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
     };
-  }
-
-  // Метод для создания объекта из Map (для чтения из базы данных)
-  factory Request.fromMap(Map<String, dynamic> map) {
-    return Request(
-      id: map['id'],
-      title: map['title'],
-      fullName: map['fullName'],
-      position: map['position'],
-      employeeNumber: map['employeeNumber'],
-      department: map['department'],
-      startDate: DateTime.parse(map['startDate']),
-      endDate: DateTime.parse(map['endDate']),
-    );
   }
 }

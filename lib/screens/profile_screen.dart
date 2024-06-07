@@ -59,7 +59,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.user == null ? 'Создать пользователя' : 'Редактировать пользователя'),
+        title: Text(widget.user == null
+            ? 'Создать пользователя'
+            : 'Редактировать пользователя'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

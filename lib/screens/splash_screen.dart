@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'package:projectapps/screens/auth_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,15 +10,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
-  }
-
-  _navigateToHome() async {
-    await Future.delayed(Duration(seconds: 2), () {});
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
-    );
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => AuthScreen()),
+      );
+    });
   }
 
   @override
@@ -26,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: Text(
-          'Добро пожаловать!',
+          'СИБИНТЕК',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

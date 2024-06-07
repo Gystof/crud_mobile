@@ -1,8 +1,8 @@
 class User {
-  String id;
-  String name;
-  String email;
-  String position;
+  final String id;
+  final String name;
+  final String email;
+  final String position;
 
   User({
     required this.id,
@@ -11,23 +11,21 @@ class User {
     required this.position,
   });
 
-  // Метод для преобразования объекта в Map (для хранения в базе данных)
-  Map<String, dynamic> toMap() {
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+      position: json['position'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'email': email,
       'position': position,
     };
-  }
-
-  // Метод для создания объекта из Map (для чтения из базы данных)
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      id: map['id'],
-      name: map['name'],
-      email: map['email'],
-      position: map['position'],
-    );
   }
 }

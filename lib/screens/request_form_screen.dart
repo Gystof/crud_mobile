@@ -27,17 +27,6 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   late Future<List<User>> _usersFuture;
   User? _selectedUser;
 
-  final List<String> _titles = [
-    "Заявление о переводе на другую работу",
-    "Заявление об увольнении",
-    "Заявление о предоставлении отпуска",
-    "Заявление о выдаче трудовой книжки",
-    "Заявление о продлении или переносе отпуска",
-    "Заявление о предоставлении ежегодного оплачиваемого отпуска",
-    "Заявление о предоставлении отпуска без сохранения заработной платы",
-    "Заявление о внесении сведений в трудовую книжку по основному месту работы"
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -51,7 +40,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
       _startDate = widget.request!.startDate;
       _endDate = widget.request!.endDate;
     } else {
-      _title = _titles[0];
+      _title = '';
       _fullName = '';
       _position = '';
       _employeeNumber = '';
@@ -117,28 +106,18 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
-              DropdownButtonHideUnderline(
-                child: DropdownButtonFormField<String>(
-                  value: _title,
-                  decoration: InputDecoration(labelText: 'Тип заявления'),
-                  items: _titles.map((title) {
-                    return DropdownMenuItem<String>(
-                      value: title,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 250),
-                        child: Text(
-                          title,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _title = value!;
-                    });
-                  },
-                ),
+              TextFormField(
+                initialValue: _title,
+                decoration: InputDecoration(labelText: 'Тип заявления'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Пожалуйста, введите тип заявления';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _title = value!;
+                },
               ),
               FutureBuilder<List<User>>(
                 future: _usersFuture,
